@@ -1,32 +1,33 @@
 """
 材料模擬器 - Flask 後端 Proxy
-轉發請求到 OpenAI Images API，保護 API Key
+轉發請求到 Google Gemini API，保護 API Key
 """
 import os
 import io
 import base64
-from PIL import Image
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from openai import OpenAI
+from google import genai
+from google.genai import types
+from PIL import Image
 
 load_dotenv()
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
-client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+client = genai.Client(api_key=os.environ.get('GOOGLE_API_KEY'))
 
 
-def to_png_bytes(file_bytes):
-    """Convert any image bytes to RGBA PNG bytes for OpenAI API."""
+def image_to_part(file_bytes):
+    """Convert image bytes to a Gemini Part."""
     img = Image.open(io.BytesIO(file_bytes))
-    img = img.convert('RGBA')
+    img = img.convert('RGB')
     buf = io.BytesIO()
     img.save(buf, format='PNG')
     buf.seek(0)
-    return buf
+    return types.Part.from_bytes(data=buf.read(), mime_type='image/png')
 
 
 @app.route('/')
@@ -73,7 +74,7 @@ def generate():
 
             # Build prompt
             prompt_parts = [
-                f'將此室內空間照片中的{mat_desc}替換為提供的材料樣本。'
+                f'請將此室內空間照片中的{mat_desc}替換為提供的材料樣本。'
             ]
             if 'floor' in materials:
                 prompt_parts.append('地板：使用提供的地板材料紋理鋪設，保持透視和光影自然。')
@@ -81,47 +82,44 @@ def generate():
                 prompt_parts.append('窗簾：使用提供的窗簾布料材質替換窗簾，保持自然垂墜感和褶皺。')
             if 'wallpaper' in materials:
                 prompt_parts.append('壁紙：使用提供的壁紙花紋覆蓋牆面，保持透視正確。')
-            prompt_parts.append('保持室內空間的整體構圖、傢俱、光線不變，只替換指定材料。輸出照片級真實感的結果。')
+            prompt_parts.append('保持室內空間的整體構圖、傢俱、光線不變，只替換指定材料。輸出照片級真實感的結果。請直接輸出編輯後的圖片。')
+
+            # Handle mask
+            mask_bytes = None
+            if mask_mode == 'manual' and mask_file:
+                mask_bytes = mask_file.read()
+                prompt_parts.insert(0, '第二張圖是遮罩，白色區域為需要替換的部分。')
 
             prompt = '\n'.join(prompt_parts)
 
-            # Convert scene image to PNG
-            scene_png = to_png_bytes(scene_bytes)
+            # Build content: prompt + scene image + optional mask + material images
+            contents = [prompt, image_to_part(scene_bytes)]
 
-            # Build mask if manual mode
-            mask_png = None
-            if mask_mode == 'manual' and mask_file:
-                mask_bytes = mask_file.read()
-                mask_png = to_png_bytes(mask_bytes)
-                prompt = f'遮罩圖中白色區域為需要替換的部分。\n{prompt}'
+            if mask_bytes:
+                contents.append(image_to_part(mask_bytes))
 
-            # Call OpenAI Images API
-            api_kwargs = {
-                'model': 'dall-e-2',
-                'image': scene_png,
-                'prompt': prompt,
-                'n': 1,
-                'size': '1024x1024',
-            }
-            if mask_png:
-                api_kwargs['mask'] = mask_png
+            for mat_type, mat_bytes in materials.items():
+                contents.append(image_to_part(mat_bytes))
 
-            response = client.images.edit(**api_kwargs)
+            # Call Gemini API
+            response = client.models.generate_content(
+                model='gemini-2.0-flash-exp',
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    response_modalities=['IMAGE', 'TEXT']
+                )
+            )
 
-            # Get result
-            image_data = response.data[0]
-            if hasattr(image_data, 'b64_json') and image_data.b64_json:
-                result_b64 = image_data.b64_json
-                result_url = f'data:image/png;base64,{result_b64}'
-            elif hasattr(image_data, 'url') and image_data.url:
-                result_url = image_data.url
-            else:
-                continue
-
-            results.append({
-                'url': result_url,
-                'label': f'模擬結果 {i + 1}'
-            })
+            # Extract result image
+            for part in response.candidates[0].content.parts:
+                if part.inline_data and part.inline_data.mime_type.startswith('image/'):
+                    result_b64 = base64.b64encode(part.inline_data.data).decode()
+                    result_url = f'data:{part.inline_data.mime_type};base64,{result_b64}'
+                    results.append({
+                        'url': result_url,
+                        'label': f'模擬結果 {i + 1}'
+                    })
+                    break
 
         return jsonify({'results': results})
 
@@ -131,9 +129,9 @@ def generate():
 
 
 if __name__ == '__main__':
-    if not os.environ.get('OPENAI_API_KEY'):
-        print('⚠️  請設定環境變數 OPENAI_API_KEY')
-        print('   export OPENAI_API_KEY=sk-...')
+    if not os.environ.get('GOOGLE_API_KEY'):
+        print('⚠️  請設定環境變數 GOOGLE_API_KEY')
+        print('   export GOOGLE_API_KEY=AIza...')
         print()
 
     port = int(os.environ.get('PORT', 5050))
