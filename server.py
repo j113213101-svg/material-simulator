@@ -5,6 +5,7 @@
 import os
 import io
 import base64
+from PIL import Image
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -16,6 +17,16 @@ app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+
+
+def to_png_bytes(file_bytes):
+    """Convert any image bytes to RGBA PNG bytes for OpenAI API."""
+    img = Image.open(io.BytesIO(file_bytes))
+    img = img.convert('RGBA')
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    buf.seek(0)
+    return buf
 
 
 @app.route('/')
@@ -74,51 +85,28 @@ def generate():
 
             prompt = '\n'.join(prompt_parts)
 
-            # Prepare images list for the API
-            images = []
+            # Convert scene image to PNG
+            scene_png = to_png_bytes(scene_bytes)
 
-            # Scene image (main image to edit)
-            scene_b64 = base64.b64encode(scene_bytes).decode()
-            images.append({
-                "type": "input_image",
-                "input_image": {
-                    "image_data": scene_b64,
-                    "format": "png"
-                }
-            })
-
-            # If manual mask provided, include it
+            # Build mask if manual mode
+            mask_png = None
             if mask_mode == 'manual' and mask_file:
                 mask_bytes = mask_file.read()
-                mask_b64 = base64.b64encode(mask_bytes).decode()
-                images.append({
-                    "type": "input_image",
-                    "input_image": {
-                        "image_data": mask_b64,
-                        "format": "png"
-                    }
-                })
+                mask_png = to_png_bytes(mask_bytes)
                 prompt = f'遮罩圖中白色區域為需要替換的部分。\n{prompt}'
 
-            # Add material reference images
-            for mat_type, mat_bytes in materials.items():
-                mat_b64 = base64.b64encode(mat_bytes).decode()
-                images.append({
-                    "type": "input_image",
-                    "input_image": {
-                        "image_data": mat_b64,
-                        "format": "png"
-                    }
-                })
-
             # Call OpenAI Images API
-            response = client.images.edit(
-                model="dall-e-2",
-                image=scene_bytes,
-                prompt=prompt,
-                n=1,
-                size="1024x1024"
-            )
+            api_kwargs = {
+                'model': 'dall-e-2',
+                'image': scene_png,
+                'prompt': prompt,
+                'n': 1,
+                'size': '1024x1024',
+            }
+            if mask_png:
+                api_kwargs['mask'] = mask_png
+
+            response = client.images.edit(**api_kwargs)
 
             # Get result
             image_data = response.data[0]
