@@ -228,7 +228,7 @@
                     <p style="font-size:16px;margin-bottom:8px;">生成失敗</p>
                     <p style="font-size:13px;">${err.message}</p>
                     <p style="font-size:12px;margin-top:12px;color:var(--gray-400);">
-                        請確認後端服務已啟動 (python server.py) 且已設定 OPENAI_API_KEY
+                        請確認後端服務已啟動 (python server.py) 且已設定 GOOGLE_API_KEY
                     </p>
                 </div>
             `;
