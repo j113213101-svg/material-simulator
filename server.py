@@ -1,6 +1,6 @@
 """
 材料模擬器 - Flask 後端 Proxy
-轉發請求到 Google Gemini API，保護 API Key
+轉發請求到 Google Gemini API (Nano Banana 2)，保護 API Key
 """
 import os
 import io
@@ -101,9 +101,9 @@ def generate():
             for mat_type, mat_bytes in materials.items():
                 contents.append(image_to_part(mat_bytes))
 
-            # Call Gemini API
+            # Call Gemini API - Nano Banana 2 (Gemini 3.1 Flash Image)
             response = client.models.generate_content(
-                model='gemini-2.0-flash',
+                model='gemini-3.1-flash-image-preview',
                 contents=contents,
                 config=types.GenerateContentConfig(
                     response_modalities=['IMAGE', 'TEXT']
