@@ -113,7 +113,7 @@ def generate():
 
             # Call OpenAI Images API
             response = client.images.edit(
-                model="gpt-image-1",
+                model="dall-e-2",
                 image=scene_bytes,
                 prompt=prompt,
                 n=1,
