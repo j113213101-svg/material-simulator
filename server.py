@@ -103,7 +103,7 @@ def generate():
 
             # Call Gemini API
             response = client.models.generate_content(
-                model='gemini-2.0-flash-exp',
+                model='gemini-2.0-flash',
                 contents=contents,
                 config=types.GenerateContentConfig(
                     response_modalities=['IMAGE', 'TEXT']
