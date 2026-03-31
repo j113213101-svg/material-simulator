@@ -19,7 +19,7 @@ CORS(app)
 
 client = genai.Client(api_key=os.environ.get('GOOGLE_API_KEY'))
 
-NUM_VARIATIONS = 1
+NUM_VARIATIONS = 1  # Generate 2 images per scene
 
 
 def image_to_part(file_bytes):
@@ -65,6 +65,9 @@ def generate():
         if not materials:
             return jsonify({'error': '請至少上傳一種材料'}), 400
 
+        # Get curtain type
+        curtain_type = request.form.get('curtain_type', 'auto')
+
         # Build material description for prompt
         mat_names = {
             'floor': '地板',
@@ -102,10 +105,25 @@ def generate():
             if 'floor' in materials:
                 prompt_parts.append('地板：使用提供的地板材料紋理鋪設，保持透視和光影自然。')
             if 'curtain' in materials:
-                prompt_parts.append('窗簾：使用提供的窗簾布料材質替換窗簾，保持自然垂墜感和褶皺。')
+                if curtain_type and curtain_type != 'auto':
+                    curtain_desc = {
+                        '布簾': '布簾（傳統布質窗簾，有自然垂墜感和褶皺）',
+                        '紗簾': '紗簾（薄紗材質，半透光，輕盈飄逸）',
+                        '捲簾': '捲簾（平整捲收式窗簾，收合時捲成圓筒狀）',
+                        '調光簾': '調光簾（斑馬簾，由透光和不透光條紋交替組成，可調節光線）',
+                        '蜂巢簾': '蜂巢簾（風琴簾，橫向蜂巢結構，可上下收合）',
+                        '直立簾': '直立簾（垂直葉片式百葉窗簾，葉片可左右旋轉調光）',
+                        '絲柔百葉': '絲柔百葉（柔紗簾，兩層紗中間夾橫向葉片，兼具紗簾與百葉功能）',
+                        '木百葉': '木百葉（實木或仿木材質的橫向百葉窗，葉片可翻轉調光）',
+                        '鋁百葉': '鋁百葉（鋁合金材質的橫向百葉窗，葉片纖細可翻轉調光）'
+                    }
+                    ct_desc = curtain_desc.get(curtain_type, curtain_type)
+                    prompt_parts.append(f'窗簾：這是{ct_desc}。使用提供的窗簾材料樣本替換窗戶上的窗簾/窗飾，務必保持{curtain_type}的正確外觀結構和特徵，不要變成其他類型的窗簾。')
+                else:
+                    prompt_parts.append('窗簾：使用提供的窗簾布料材質替換窗簾，保持與材料照片相同的窗簾類型和結構特徵。')
             if 'wallpaper' in materials:
                 prompt_parts.append('壁紙：使用提供的壁紙花紋覆蓋牆面，保持透視正確。')
-            prompt_parts.append('保持室內空間的整體構圖、傢俱、光線不變，只替換指定材料。輸出照片級真實感的結果。請直接輸出編輯後的圖片。')
+            prompt_parts.append('保持室內空間的整體構圖、傢俱、光線不變，只替揖指定材料。輸出照片級真實感的結果。請直接輸出編輯後的圖片。')
 
             # Handle mask
             mask_bytes = None
@@ -130,6 +148,7 @@ def generate():
             # Generate NUM_VARIATIONS images per scene
             for gen_idx in range(NUM_VARIATIONS):
                 try:
+                    # Add variation hint for 2nd+ generation
                     gen_contents = list(contents)
                     if gen_idx > 0:
                         gen_contents[0] = prompt + f'\n（請生成第{gen_idx + 1}種不同的變化方案，材料鋪設角度或色調可以略有不同）'
@@ -155,6 +174,7 @@ def generate():
                             break
                 except Exception as gen_err:
                     print(f'Generation {gen_idx + 1} for scene {i + 1} failed: {gen_err}')
+                    # Continue to next variation
 
         return jsonify({'results': results})
 
