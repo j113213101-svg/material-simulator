@@ -1,5 +1,5 @@
 /**
- * æææ¨¡æ¬å¨ - ä¸»æç¨éè¼¯
+ * 材料模擬器 - 主應用邏輯
  */
 (function () {
     // ===== State =====
@@ -87,13 +87,13 @@
             const card = document.createElement('div');
             card.className = 'scene-card';
             card.innerHTML = `
-                <img src="${scene.dataURL}" alt="ç¾æ³ç§ ${idx + 1}">
+                <img src="${scene.dataURL}" alt="現況照 ${idx + 1}">
                 <span class="badge ${scene.maskMode === 'ai' ? 'badge-ai' : 'badge-manual'}">
-                    ${scene.maskMode === 'ai' ? 'AI èªå' : 'æåé®ç½©'}
+                    ${scene.maskMode === 'ai' ? 'AI 自動' : '手動遮罩'}
                 </span>
-                <button class="btn-remove-scene" data-idx="${idx}" title="ç§»é¤">&times;</button>
+                <button class="btn-remove-scene" data-idx="${idx}" title="移除">&times;</button>
                 <div class="scene-card-overlay">
-                    <button class="btn-mask" data-idx="${idx}">è¨­å®é®ç½©</button>
+                    <button class="btn-mask" data-idx="${idx}">設定遮罩</button>
                 </div>
             `;
 
@@ -204,7 +204,7 @@
         // Check at least one material is selected
         const hasMaterial = Object.values(state.materials).some(m => m !== null);
         if (!hasMaterial) {
-            alert('è«è³å°ä¸å³ä¸ç¨®ææç§ç');
+            alert('請至少上傳一種材料照片');
             return;
         }
 
@@ -231,10 +231,10 @@
             console.error('Generation error:', err);
             resultsGrid.innerHTML = `
                 <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gray-500);">
-                    <p style="font-size:16px;margin-bottom:8px;">çæå¤±æ</p>
+                    <p style="font-size:16px;margin-bottom:8px;">生成失敗</p>
                     <p style="font-size:13px;">${err.message}</p>
                     <p style="font-size:12px;margin-top:12px;color:var(--gray-400);">
-                        è«ç¢ºèªå¾ç«¯æåå·²åå (python server.py) ä¸å·²è¨­å® GOOGLE_API_KEY
+                        請確認後端服務已啟動 (python server.py) 且已設定 GOOGLE_API_KEY
                     </p>
                 </div>
             `;
@@ -246,7 +246,7 @@
     function renderResults() {
         resultsGrid.innerHTML = '';
         if (state.results.length === 0) {
-            resultsGrid.innerHTML = '<p style="text-align:center;color:var(--gray-400);grid-column:1/-1;padding:40px;">ç¡çµæ</p>';
+            resultsGrid.innerHTML = '<p style="text-align:center;color:var(--gray-400);grid-column:1/-1;padding:40px;">無結果</p>';
             return;
         }
 
@@ -257,7 +257,7 @@
                 <div class="before-after-wrap">
                     <div class="ba-side">
                         <span class="ba-label ba-before">Before</span>
-                        <img src="${result.original_url}" alt="åå§ç§ç">
+                        <img src="${result.original_url}" alt="原始照片">
                     </div>
                     <div class="ba-side">
                         <span class="ba-label ba-after">After</span>
@@ -266,7 +266,7 @@
                 </div>
                 <div class="result-card-footer">
                     <span>${result.label}</span>
-                    <button class="btn-download" data-idx="${idx}">ä¸è¼</button>
+                    <button class="btn-download" data-idx="${idx}">下載</button>
                 </div>
             `;
             resultsGrid.appendChild(card);
