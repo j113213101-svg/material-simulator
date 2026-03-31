@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>薔葳家居 | 地板窗簾壁紙AI模擬器</title>
+    <title>èè³å®¶å± | å°æ¿çªç°¾å£ç´AIæ¨¡æ¬å¨</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
@@ -12,29 +12,29 @@
         <!-- Header -->
         <header class="header">
             <div class="brand">
-                <h1>薔葳家居</h1>
+                <h1>èè³å®¶å±</h1>
                 <span class="brand-en">QIANG WEI</span>
             </div>
             <div class="header-divider"></div>
-            <p class="header-desc">地板窗簾壁紙AI模擬器</p>
-            <p class="header-sub">上傳現況照與材料樣本，AI 為您生成模擬效果圖</p>
+            <p class="header-desc">å°æ¿çªç°¾å£ç´AIæ¨¡æ¬å¨</p>
+            <p class="header-sub">ä¸å³ç¾æ³ç§èæææ¨£æ¬ï¼AI çºæ¨çææ¨¡æ¬ææå</p>
         </header>
 
         <!-- Step Indicator -->
         <div class="steps-bar">
             <div class="step active" data-step="1">
                 <span class="step-num">1</span>
-                <span class="step-label">現況照</span>
+                <span class="step-label">ç¾æ³ç§</span>
             </div>
             <div class="step-line"></div>
             <div class="step" data-step="2">
                 <span class="step-num">2</span>
-                <span class="step-label">材料照</span>
+                <span class="step-label">æææ¶§</span>
             </div>
             <div class="step-line"></div>
             <div class="step" data-step="3">
                 <span class="step-num">3</span>
-                <span class="step-label">生成結果</span>
+                <span class="step-label">çæçµæ</span>
             </div>
         </div>
 
@@ -42,8 +42,8 @@
         <main class="main">
             <!-- Step 1: Scene Photos -->
             <section class="panel" id="panel-1">
-                <h2>上傳現況照片</h2>
-                <p class="hint">可上傳多張室內空間照片，每張可獨立設定遮罩區域</p>
+                <h2>ä¸å³ç¾æ³ç§ç</h2>
+                <p class="hint">å¯ä¸å³å¤å¼µå®¤å§ç©ºéç§çï¼æ¯å¼µå¯ç¨ç«è¨­å®é®ç½©åå</p>
 
                 <div class="upload-zone" id="scene-upload-zone">
                     <div class="upload-placeholder">
@@ -52,8 +52,8 @@
                             <circle cx="8.5" cy="8.5" r="1.5"/>
                             <path d="M21 15l-5-5L5 21"/>
                         </svg>
-                        <span>拖拉照片到此處，或點擊上傳</span>
-                        <span class="upload-sub">支援 JPG、PNG，可多選</span>
+                        <span>ææç§çå°æ­¤èï¼æé»æä¸å³</span>
+                        <span class="upload-sub">æ¯æ´ JPGãPNGï¼å¯å¤é¸</span>
                     </div>
                     <input type="file" id="scene-input" multiple accept="image/jpeg,image/png" hidden>
                 </div>
@@ -62,19 +62,19 @@
                 <div class="scene-grid" id="scene-grid"></div>
 
                 <div class="panel-actions">
-                    <button class="btn btn-primary" id="btn-to-step2" disabled>下一步：上傳材料照</button>
+                    <button class="btn btn-primary" id="btn-to-step2" disabled>ä¸ä¸æ­¥ï¼ä¸å³æææ¶§</button>
                 </div>
             </section>
 
             <!-- Step 2: Material Photos -->
             <section class="panel hidden" id="panel-2">
-                <h2>上傳材料照片</h2>
-                <p class="hint">三種材料皆為選填，上傳後可裁切截取材料部分</p>
+                <h2>ä¸å³ææç§ç</h2>
+                <p class="hint">ä¸ç¨®ææççºé¸å¡«ï¼ä¸å³å¾å¯è£åæªåææé¨å</p>
 
                 <div class="materials-row">
                     <!-- Floor -->
                     <div class="material-card" data-type="floor">
-                        <h3>地板</h3>
+                        <h3>å°æ¿</h3>
                         <div class="material-upload" data-type="floor">
                             <div class="material-placeholder">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -82,81 +82,81 @@
                                     <line x1="3" y1="12" x2="21" y2="12"/>
                                     <line x1="12" y1="3" x2="12" y2="21"/>
                                 </svg>
-                                <span>上傳地板材料</span>
+                                <span>ä¸å³å°æ¿ææ</span>
                             </div>
                             <input type="file" accept="image/jpeg,image/png" hidden>
                         </div>
                         <div class="material-preview hidden" data-type="floor">
                             <canvas></canvas>
                             <div class="material-actions">
-                                <button class="btn btn-sm btn-crop">裁切</button>
-                                <button class="btn btn-sm btn-remove">移除</button>
+                                <button class="btn btn-sm btn-crop">è£å</button>
+                                <button class="btn btn-sm btn-remove">ç§»é¤</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Curtain -->
                     <div class="material-card" data-type="curtain">
-                        <h3>窗簾</h3>
+                        <h3>çªç°¾</h3>
                         <div class="material-upload" data-type="curtain">
                             <div class="material-placeholder">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                     <path d="M4 3h16v2H4z"/>
                                     <path d="M6 5v14c0 0 2-3 6-3s6 3 6 3V5"/>
                                 </svg>
-                                <span>上傳窗簾材料</span>
+                                <span>ä¸å³çªç°¾ææ</span>
                             </div>
                             <input type="file" accept="image/jpeg,image/png" hidden>
                         </div>
                         <div class="material-preview hidden" data-type="curtain">
                             <canvas></canvas>
                             <div class="material-actions">
-                                <button class="btn btn-sm btn-crop">裁切</button>
-                                <button class="btn btn-sm btn-remove">移除</button>
+                                <button class="btn btn-sm btn-crop">è£å</button>
+                                <button class="btn btn-sm btn-remove">ç§»é¤</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Wallpaper -->
                     <div class="material-card" data-type="wallpaper">
-                        <h3>壁紙</h3>
+                        <h3>å£ç´</h3>
                         <div class="material-upload" data-type="wallpaper">
                             <div class="material-placeholder">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                     <rect x="3" y="3" width="18" height="18" rx="2"/>
                                     <path d="M3 8h18M3 13h18M3 18h18"/>
                                 </svg>
-                                <span>上傳壁紙材料</span>
+                                <span>ä¸å³å£ç´ææ</span>
                             </div>
                             <input type="file" accept="image/jpeg,image/png" hidden>
                         </div>
                         <div class="material-preview hidden" data-type="wallpaper">
                             <canvas></canvas>
                             <div class="material-actions">
-                                <button class="btn btn-sm btn-crop">裁切</button>
-                                <button class="btn btn-sm btn-remove">移除</button>
+                                <button class="btn btn-sm btn-crop">è£å</button>
+                                <button class="btn btn-sm btn-remove">ç§»é¤</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="panel-actions">
-                    <button class="btn btn-secondary" id="btn-back-step1">返回</button>
-                    <button class="btn btn-primary btn-generate" id="btn-generate">生成模擬照</button>
+                    <button class="btn btn-secondary" id="btn-back-step1">è¿å</button>
+                    <button class="btn btn-primary btn-generate" id="btn-generate">çææ¨¡æ¬ç§</button>
                 </div>
             </section>
 
             <!-- Step 3: Results -->
             <section class="panel hidden" id="panel-3">
-                <h2>模擬結果</h2>
+                <h2>æ¨¡æ¬çµæ</h2>
                 <div class="results-grid" id="results-grid"></div>
                 <div class="generating hidden" id="generating">
                     <div class="spinner"></div>
-                    <p>AI 正在生成模擬照片，請稍候...</p>
+                    <p>AI æ­£å¨çææ¨¡æ¬ç§çï¼è«ç¨å...</p>
                 </div>
                 <div class="panel-actions">
-                    <button class="btn btn-secondary" id="btn-back-step2">返回修改</button>
-                    <button class="btn btn-primary" id="btn-download-all" disabled>下載全部</button>
+                    <button class="btn btn-secondary" id="btn-back-step2">è¿åä¿®æ¹</button>
+                    <button class="btn btn-primary" id="btn-download-all" disabled>ä¸è¼å¨é¨</button>
                 </div>
             </section>
         </main>
@@ -165,48 +165,54 @@
         <div class="modal hidden" id="mask-modal">
             <div class="modal-content mask-editor">
                 <div class="modal-header">
-                    <h3>設定遮罩區域</h3>
+                    <h3>è¨­å®é®ç½©åå</h3>
                     <button class="modal-close" id="mask-modal-close">&times;</button>
                 </div>
                 <div class="mask-toolbar">
                     <div class="mask-mode-group">
                         <label class="mask-option">
                             <input type="radio" name="mask-mode" value="ai" checked>
-                            <span class="mask-option-label">AI 自動判斷</span>
+                            <span class="mask-option-label">AI èªåå¤æ·</span>
                         </label>
                         <label class="mask-option">
                             <input type="radio" name="mask-mode" value="manual">
-                            <span class="mask-option-label">手動塗抹</span>
+                            <span class="mask-option-label">æåå¡æ¹</span>
                         </label>
                     </div>
                     <div class="manual-tools hidden" id="manual-tools">
                         <div class="tool-group">
-                            <button class="tool-btn active" data-tool="brush" title="畫筆塗抹">
+                            <button class="tool-btn active" data-tool="brush" title="ç«ç­å¡æ¹">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M12 19l7-7 3 3-7 7-3-3z"/>
                                     <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
                                 </svg>
                             </button>
-                            <button class="tool-btn" data-tool="polygon" title="多邊形框選">
+                            <button class="tool-btn" data-tool="polygon" title="å¤éå½¢æ¡é¸">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polygon points="12,2 22,8 18,20 6,20 2,8"/>
                                 </svg>
                             </button>
-                            <button class="tool-btn" data-tool="eraser" title="橡皮擦">
+                            <button class="tool-btn" data-tool="eraser" title="æ©¡ç®æ¦">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M20 20H7L3 16l9-9 8 8-4 4z"/>
                                     <path d="M6 11l8 8"/>
                                 </svg>
                             </button>
                         </div>
+                        <div class="color-selector-group" id="color-selector">
+                            <label>ææåå</label>
+                            <div class="color-swatches" id="color-swatches">
+                                <!-- Dynamically populated by mask-tool.js -->
+                            </div>
+                        </div>
                         <div class="brush-size-group">
-                            <label>筆刷大小</label>
+                            <label>ç­å·å¤§å°</label>
                             <input type="range" id="brush-size" min="5" max="80" value="25">
                             <span id="brush-size-label">25px</span>
                         </div>
                         <div class="tool-group">
-                            <button class="btn btn-sm" id="mask-undo">復原</button>
-                            <button class="btn btn-sm" id="mask-clear">清除</button>
+                            <button class="btn btn-sm" id="mask-undo">å¾©å</button>
+                            <button class="btn btn-sm" id="mask-clear">æ¸é¤</button>
                         </div>
                     </div>
                 </div>
@@ -216,8 +222,8 @@
                     <div class="mask-cursor" id="mask-cursor"></div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" id="mask-cancel">取消</button>
-                    <button class="btn btn-primary" id="mask-confirm">確認遮罩</button>
+                    <button class="btn btn-secondary" id="mask-cancel">åæ¶</button>
+                    <button class="btn btn-primary" id="mask-confirm">ç¢ºèªé®ç½©</button>
                 </div>
             </div>
         </div>
@@ -226,7 +232,7 @@
         <div class="modal hidden" id="crop-modal">
             <div class="modal-content crop-editor">
                 <div class="modal-header">
-                    <h3>裁切材料區域</h3>
+                    <h3>è£åææåå</h3>
                     <button class="modal-close" id="crop-modal-close">&times;</button>
                 </div>
                 <div class="crop-canvas-wrap">
@@ -243,15 +249,15 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" id="crop-cancel">取消</button>
-                    <button class="btn btn-primary" id="crop-confirm">確認裁切</button>
+                    <button class="btn btn-secondary" id="crop-cancel">åæ¶</button>
+                    <button class="btn btn-primary" id="crop-confirm">ç¢ºèªè£å</button>
                 </div>
             </div>
         </div>
         <!-- Footer -->
         <footer class="footer">
             <div class="footer-divider"></div>
-            <p>&copy; 薔葳家居 QIANG WEI</p>
+            <p>&copy; èè³å®¶å± QIANG WEI</p>
         </footer>
     </div>
 
