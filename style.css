@@ -558,11 +558,50 @@ body {
 .crop-handle.e { top: 50%; right: -6px; transform: translateY(-50%); cursor: e-resize; }
 .crop-handle.w { top: 50%; left: -6px; transform: translateY(-50%); cursor: w-resize; }
 
+/* ===== Color Selector (Mask Material Colors) ===== */
+.color-selector-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--gray-600);
+}
+.color-swatches {
+    display: flex;
+    gap: 4px;
+}
+.color-swatch {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 2px solid var(--gray-200);
+    background: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--gray-700);
+    transition: var(--transition);
+}
+.color-swatch:hover { border-color: var(--gray-300); }
+.color-swatch.active {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+}
+.color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
 /* ===== Results ===== */
 .results-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
+    grid-template-columns: 1fr;
+    gap: 20px;
 }
 .result-card {
     border-radius: var(--radius);
@@ -576,6 +615,42 @@ body {
     width: 100%;
     display: block;
 }
+
+/* ===== Before / After ===== */
+.before-after-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--gray-200);
+}
+.ba-side {
+    position: relative;
+    background: #fff;
+}
+.ba-side img {
+    width: 100%;
+    display: block;
+}
+.ba-label {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.ba-before {
+    background: rgba(26, 39, 68, 0.65);
+    color: #fff;
+}
+.ba-after {
+    background: var(--accent);
+    color: var(--primary);
+}
+
 .result-card-footer {
     padding: 10px 12px;
     display: flex;
@@ -648,4 +723,7 @@ body {
     .step-label { font-size: 12px; }
     .step-line { width: 24px; margin: 0 6px; }
     .header h1 { font-size: 26px; letter-spacing: 2px; }
+    .before-after-wrap { grid-template-columns: 1fr; }
+    .color-selector-group { flex-wrap: wrap; }
+    .color-swatches { flex-wrap: wrap; }
 }
