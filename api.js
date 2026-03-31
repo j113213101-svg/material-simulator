@@ -40,6 +40,11 @@ const API = {
         // Send material types info for color-coded mask mapping
         formData.append('materials_info', JSON.stringify(uploadedMaterials));
 
+        // Send curtain type
+        if (params.curtainType) {
+            formData.append('curtain_type', params.curtainType);
+        }
+
         const response = await fetch(`${this.BASE_URL}/api/generate`, {
             method: 'POST',
             body: formData
