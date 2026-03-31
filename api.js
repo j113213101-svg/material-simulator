@@ -1,15 +1,15 @@
 /**
- * API module - 與後端 Flask proxy 通信，呼叫 OpenAI 圖片編輯 API
+ * API module - èå¾ç«¯ Flask proxy éä¿¡ï¼å¼å« Google Gemini API
  */
 const API = {
     BASE_URL: '',
 
     /**
-     * 生成模擬照
+     * çææ¨¡æ¬ç§
      * @param {Object} params
      * @param {Array<{imageDataURL: string, maskDataURL: string|null, maskMode: string}>} params.scenes
      * @param {{floor: string|null, curtain: string|null, wallpaper: string|null}} params.materials
-     * @returns {Promise<Array<{url: string}>>}
+     * @returns {Promise<{results: Array<{url: string, original_url: string, label: string}>}>}
      */
     async generate(params) {
         const formData = new FormData();
@@ -29,12 +29,16 @@ const API = {
         formData.append('scene_count', params.scenes.length);
 
         // Add materials
+        const uploadedMaterials = [];
         for (const [key, dataURL] of Object.entries(params.materials)) {
             if (dataURL) {
                 const blob = await this._dataURLtoBlob(dataURL);
                 formData.append(`material_${key}`, blob, `material_${key}.png`);
+                uploadedMaterials.push(key);
             }
         }
+        // Send material types info for color-coded mask mapping
+        formData.append('materials_info', JSON.stringify(uploadedMaterials));
 
         const response = await fetch(`${this.BASE_URL}/api/generate`, {
             method: 'POST',
