@@ -32,6 +32,19 @@
         btnGenerate.disabled = !(hasScene && hasMaterial);
     }
 
+    // ===== Curtain Type: toggle custom input =====
+    document.querySelectorAll('input[name="curtain-type"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const customInput = document.getElementById('curtain-type-custom');
+            if (radio.value === 'other' && radio.checked) {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+            }
+        });
+    });
+
     // ===== Scene Upload =====
     sceneUploadZone.addEventListener('click', () => sceneInput.click());
     sceneUploadZone.addEventListener('dragover', (e) => { e.preventDefault(); sceneUploadZone.classList.add('dragover'); });
@@ -205,7 +218,11 @@
 
             // Get curtain type selection
             const curtainTypeEl = document.querySelector('input[name="curtain-type"]:checked');
-            const curtainType = curtainTypeEl ? curtainTypeEl.value : 'auto';
+            let curtainType = curtainTypeEl ? curtainTypeEl.value : 'auto';
+            if (curtainType === 'other') {
+                const customVal = document.getElementById('curtain-type-custom').value.trim();
+                curtainType = customVal || 'auto';
+            }
 
             const response = await API.generate({
                 scenes: scenesPayload,
