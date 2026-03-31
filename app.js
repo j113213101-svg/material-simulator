@@ -203,9 +203,14 @@
                 maskMode: s.maskMode
             }));
 
+            // Get curtain type selection
+            const curtainTypeEl = document.querySelector('input[name="curtain-type"]:checked');
+            const curtainType = curtainTypeEl ? curtainTypeEl.value : 'auto';
+
             const response = await API.generate({
                 scenes: scenesPayload,
-                materials: state.materials
+                materials: state.materials,
+                curtainType: curtainType
             });
 
             state.results = response.results || [];
