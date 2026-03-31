@@ -1,5 +1,5 @@
 /**
- * 材料模擬器 - 主應用邏輯
+ * æææ¨¡æ¬å¨ - ä¸»æç¨éè¼¯
  */
 (function () {
     // ===== State =====
@@ -8,7 +8,7 @@
         scenes: [], // { id, file, dataURL, maskMode: 'ai'|'manual', maskDataURL, maskPreview }
         materials: { floor: null, curtain: null, wallpaper: null }, // dataURL after crop
         materialsOriginal: { floor: null, curtain: null, wallpaper: null }, // dataURL before crop
-        results: [] // { dataURL, label }
+        results: [] // { url, original_url, label }
     };
 
     // ===== DOM Refs =====
@@ -39,6 +39,11 @@
             el.classList.toggle('active', s === step);
             el.classList.toggle('done', s < step);
         });
+    }
+
+    // ===== Helper: get uploaded material types =====
+    function getUploadedMaterials() {
+        return Object.keys(state.materials).filter(k => state.materials[k] !== null);
     }
 
     // ===== Scene Upload =====
@@ -82,13 +87,13 @@
             const card = document.createElement('div');
             card.className = 'scene-card';
             card.innerHTML = `
-                <img src="${scene.dataURL}" alt="現況照 ${idx + 1}">
+                <img src="${scene.dataURL}" alt="ç¾æ³ç§ ${idx + 1}">
                 <span class="badge ${scene.maskMode === 'ai' ? 'badge-ai' : 'badge-manual'}">
-                    ${scene.maskMode === 'ai' ? 'AI 自動' : '手動遮罩'}
+                    ${scene.maskMode === 'ai' ? 'AI èªå' : 'æåé®ç½©'}
                 </span>
-                <button class="btn-remove-scene" data-idx="${idx}" title="移除">&times;</button>
+                <button class="btn-remove-scene" data-idx="${idx}" title="ç§»é¤">&times;</button>
                 <div class="scene-card-overlay">
-                    <button class="btn-mask" data-idx="${idx}">設定遮罩</button>
+                    <button class="btn-mask" data-idx="${idx}">è¨­å®é®ç½©</button>
                 </div>
             `;
 
@@ -119,7 +124,8 @@
                 e.stopPropagation();
                 const idx = parseInt(btn.dataset.idx);
                 const scene = state.scenes[idx];
-                window.maskTool.open(scene.dataURL, scene.maskPreview, (result) => {
+                const uploadedMaterials = getUploadedMaterials();
+                window.maskTool.open(scene.dataURL, scene.maskPreview, uploadedMaterials, (result) => {
                     scene.maskMode = result.mode;
                     scene.maskDataURL = result.maskDataURL;
                     scene.maskPreview = result.previewDataURL;
@@ -198,7 +204,7 @@
         // Check at least one material is selected
         const hasMaterial = Object.values(state.materials).some(m => m !== null);
         if (!hasMaterial) {
-            alert('請至少上傳一種材料照片');
+            alert('è«è³å°ä¸å³ä¸ç¨®ææç§ç');
             return;
         }
 
@@ -225,10 +231,10 @@
             console.error('Generation error:', err);
             resultsGrid.innerHTML = `
                 <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gray-500);">
-                    <p style="font-size:16px;margin-bottom:8px;">生成失敗</p>
+                    <p style="font-size:16px;margin-bottom:8px;">çæå¤±æ</p>
                     <p style="font-size:13px;">${err.message}</p>
                     <p style="font-size:12px;margin-top:12px;color:var(--gray-400);">
-                        請確認後端服務已啟動 (python server.py) 且已設定 GOOGLE_API_KEY
+                        è«ç¢ºèªå¾ç«¯æåå·²åå (python server.py) ä¸å·²è¨­å® GOOGLE_API_KEY
                     </p>
                 </div>
             `;
@@ -240,18 +246,27 @@
     function renderResults() {
         resultsGrid.innerHTML = '';
         if (state.results.length === 0) {
-            resultsGrid.innerHTML = '<p style="text-align:center;color:var(--gray-400);grid-column:1/-1;padding:40px;">無結果</p>';
+            resultsGrid.innerHTML = '<p style="text-align:center;color:var(--gray-400);grid-column:1/-1;padding:40px;">ç¡çµæ</p>';
             return;
         }
 
         state.results.forEach((result, idx) => {
             const card = document.createElement('div');
-            card.className = 'result-card';
+            card.className = 'result-card before-after-card';
             card.innerHTML = `
-                <img src="${result.url || result.dataURL}" alt="模擬結果 ${idx + 1}">
+                <div class="before-after-wrap">
+                    <div class="ba-side">
+                        <span class="ba-label ba-before">Before</span>
+                        <img src="${result.original_url}" alt="åå§ç§ç">
+                    </div>
+                    <div class="ba-side">
+                        <span class="ba-label ba-after">After</span>
+                        <img src="${result.url}" alt="${result.label}">
+                    </div>
+                </div>
                 <div class="result-card-footer">
-                    <span>模擬結果 ${idx + 1}</span>
-                    <button class="btn-download" data-idx="${idx}">下載</button>
+                    <span>${result.label}</span>
+                    <button class="btn-download" data-idx="${idx}">ä¸è¼</button>
                 </div>
             `;
             resultsGrid.appendChild(card);
@@ -259,11 +274,11 @@
 
         btnDownloadAll.disabled = false;
 
-        // Download single
+        // Download single (after image only)
         resultsGrid.querySelectorAll('.btn-download').forEach(btn => {
             btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.idx);
-                downloadImage(state.results[idx].url || state.results[idx].dataURL, `simulation_${idx + 1}.png`);
+                downloadImage(state.results[idx].url, `simulation_${idx + 1}.png`);
             });
         });
     }
@@ -272,7 +287,7 @@
     btnDownloadAll.addEventListener('click', () => {
         state.results.forEach((result, idx) => {
             setTimeout(() => {
-                downloadImage(result.url || result.dataURL, `simulation_${idx + 1}.png`);
+                downloadImage(result.url, `simulation_${idx + 1}.png`);
             }, idx * 300);
         });
     });
