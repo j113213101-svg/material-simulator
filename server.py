@@ -19,7 +19,7 @@ CORS(app)
 
 client = genai.Client(api_key=os.environ.get('GOOGLE_API_KEY'))
 
-NUM_VARIATIONS = 2  # Generate 2 images per scene
+NUM_VARIATIONS = 1
 
 
 def image_to_part(file_bytes):
@@ -130,7 +130,6 @@ def generate():
             # Generate NUM_VARIATIONS images per scene
             for gen_idx in range(NUM_VARIATIONS):
                 try:
-                    # Add variation hint for 2nd+ generation
                     gen_contents = list(contents)
                     if gen_idx > 0:
                         gen_contents[0] = prompt + f'\n（請生成第{gen_idx + 1}種不同的變化方案，材料鋪設角度或色調可以略有不同）'
@@ -156,7 +155,6 @@ def generate():
                             break
                 except Exception as gen_err:
                     print(f'Generation {gen_idx + 1} for scene {i + 1} failed: {gen_err}')
-                    # Continue to next variation
 
         return jsonify({'results': results})
 
