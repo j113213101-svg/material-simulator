@@ -1,10 +1,9 @@
 /**
- * 材料模擬器 - 主應用邏輯
+ * 材料模擬器 - 主應用邏輯（單頁版）
  */
 (function () {
     // ===== State =====
     const state = {
-        currentStep: 1,
         scenes: [], // { id, file, dataURL, maskMode: 'ai'|'manual', maskDataURL, maskPreview }
         materials: { floor: null, curtain: null, wallpaper: null }, // dataURL after crop
         materialsOriginal: { floor: null, curtain: null, wallpaper: null }, // dataURL before crop
@@ -12,38 +11,25 @@
     };
 
     // ===== DOM Refs =====
-    const panels = {
-        1: document.getElementById('panel-1'),
-        2: document.getElementById('panel-2'),
-        3: document.getElementById('panel-3')
-    };
     const sceneUploadZone = document.getElementById('scene-upload-zone');
     const sceneInput = document.getElementById('scene-input');
     const sceneGrid = document.getElementById('scene-grid');
-    const btnToStep2 = document.getElementById('btn-to-step2');
-    const btnBackStep1 = document.getElementById('btn-back-step1');
     const btnGenerate = document.getElementById('btn-generate');
-    const btnBackStep2 = document.getElementById('btn-back-step2');
     const btnDownloadAll = document.getElementById('btn-download-all');
     const resultsGrid = document.getElementById('results-grid');
     const generating = document.getElementById('generating');
-
-    // ===== Step Navigation =====
-    function goToStep(step) {
-        state.currentStep = step;
-        for (const [s, panel] of Object.entries(panels)) {
-            panel.classList.toggle('hidden', parseInt(s) !== step);
-        }
-        document.querySelectorAll('.steps-bar .step').forEach(el => {
-            const s = parseInt(el.dataset.step);
-            el.classList.toggle('active', s === step);
-            el.classList.toggle('done', s < step);
-        });
-    }
+    const resultsPanel = document.getElementById('panel-3');
 
     // ===== Helper: get uploaded material types =====
     function getUploadedMaterials() {
         return Object.keys(state.materials).filter(k => state.materials[k] !== null);
+    }
+
+    // ===== Update Generate Button State =====
+    function updateGenerateBtn() {
+        const hasScene = state.scenes.length > 0;
+        const hasMaterial = Object.values(state.materials).some(m => m !== null);
+        btnGenerate.disabled = !(hasScene && hasMaterial);
     }
 
     // ===== Scene Upload =====
@@ -75,7 +61,7 @@
                 };
                 state.scenes.push(scene);
                 renderSceneGrid();
-                updateButtons();
+                updateGenerateBtn();
             };
             reader.readAsDataURL(file);
         });
@@ -114,7 +100,7 @@
                 e.stopPropagation();
                 state.scenes.splice(parseInt(btn.dataset.idx), 1);
                 renderSceneGrid();
-                updateButtons();
+                updateGenerateBtn();
             });
         });
 
@@ -135,10 +121,6 @@
         });
     }
 
-    function updateButtons() {
-        btnToStep2.disabled = state.scenes.length === 0;
-    }
-
     // ===== Material Upload =====
     document.querySelectorAll('.material-upload').forEach(zone => {
         const type = zone.dataset.type;
@@ -152,6 +134,7 @@
                 state.materialsOriginal[type] = e.target.result;
                 state.materials[type] = e.target.result;
                 showMaterialPreview(type, e.target.result);
+                updateGenerateBtn();
             };
             reader.readAsDataURL(input.files[0]);
             input.value = '';
@@ -191,13 +174,9 @@
             state.materialsOriginal[type] = null;
             preview.classList.add('hidden');
             uploadZone.classList.remove('hidden');
+            updateGenerateBtn();
         };
     }
-
-    // ===== Navigation Buttons =====
-    btnToStep2.addEventListener('click', () => goToStep(2));
-    btnBackStep1.addEventListener('click', () => goToStep(1));
-    btnBackStep2.addEventListener('click', () => goToStep(2));
 
     // ===== Generate =====
     btnGenerate.addEventListener('click', async () => {
@@ -207,11 +186,15 @@
             alert('請至少上傳一種材料照片');
             return;
         }
+        if (state.scenes.length === 0) {
+            alert('請至少上傳一張現況照片');
+            return;
+        }
 
-        goToStep(3);
         resultsGrid.innerHTML = '';
         generating.classList.remove('hidden');
         btnDownloadAll.disabled = true;
+        resultsPanel.scrollIntoView({ behavior: 'smooth' });
 
         try {
             const scenesPayload = state.scenes.map(s => ({
@@ -298,7 +281,4 @@
         a.download = filename;
         a.click();
     }
-
-    // ===== Init =====
-    goToStep(1);
 })();
