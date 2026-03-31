@@ -1,6 +1,6 @@
 """
-æææ¨¡æ¬å¨ - Flask å¾ç«¯ Proxy
-è½ç¼è«æ±å° Google Gemini API (Nano Banana 2)ï¼ä¿è­· API Key
+材料模擬器 - Flask 後端 Proxy
+轉發請求到 Google Gemini API (Nano Banana 2)，保護 API Key
 """
 import os
 import io
@@ -53,7 +53,7 @@ def generate():
     try:
         scene_count = int(request.form.get('scene_count', 0))
         if scene_count == 0:
-            return jsonify({'error': 'æªæä¾ç¾æ³æ¶§'}), 400
+            return jsonify({'error': '未提供現況照'}), 400
 
         # Collect materials
         materials = {}
@@ -63,21 +63,21 @@ def generate():
                 materials[mat_type] = f.read()
 
         if not materials:
-            return jsonify({'error': 'è«è³å°ä¸å³ä¸ç¨®ææ'}), 400
+            return jsonify({'error': '請至少上傳一種材料'}), 400
 
         # Build material description for prompt
         mat_names = {
-            'floor': 'å°æ¿',
-            'curtain': 'çªç°¾',
-            'wallpaper': 'å£ç´/çé¢'
+            'floor': '地板',
+            'curtain': '窗簾',
+            'wallpaper': '壁紙/牆面'
         }
-        mat_desc = 'ã'.join([mat_names[k] for k in materials.keys()])
+        mat_desc = '、'.join([mat_names[k] for k in materials.keys()])
 
         # Color mask descriptions per material
         color_desc_map = {
-            'floor': 'ç´è²åå(R=255)è¡¨ç¤ºå°æ¿',
-            'curtain': 'èè²åå(B=255)è¡¨ç¤ºçªç°¾',
-            'wallpaper': 'ç¶ è²åå(G=255)è¡¨ç¤ºå£ç´/çé¢'
+            'floor': '紅色區域(R=255)表示地板',
+            'curtain': '藍色區域(B=255)表示窗簾',
+            'wallpaper': '綠色區域(G=255)表示壁紙/牆面'
         }
 
         results = []
@@ -97,15 +97,15 @@ def generate():
 
             # Build prompt
             prompt_parts = [
-                f'è«å°æ­¤å®¤å§ç©ºéç§çä¸­ç{mat_desc}æ¿æçºæä¾çæææ¨£æ¬ã'
+                f'請將此室內空間照片中的{mat_desc}替換為提供的材料樣本。'
             ]
             if 'floor' in materials:
-                prompt_parts.append('å°æ¿ï¼ä½¿ç¨æä¾çå°æ¿ææç´çéªè¨­ï¼ä¿æéè¦ååå½±èªç¶ã')
+                prompt_parts.append('地板：使用提供的地板材料紋理鋪設，保持透視和光影自然。')
             if 'curtain' in materials:
-                prompt_parts.append('çªç°¾ï¼ä½¿ç¨æä¾ççªç°¾å¸ææè³ªæ¿æçªç°¾ï¼ä¿æèªç¶åå¢æåè¤¶çºã')
+                prompt_parts.append('窗簾：使用提供的窗簾布料材質替換窗簾，保持自然垂墜感和褶皺。')
             if 'wallpaper' in materials:
-                prompt_parts.append('å£ç´ï¼ä½¿ç¨æä¾çå£ç´è±ç´è¦èçé¢ï¼ä¿æéè¦æ­£ç¢ºã')
-            prompt_parts.append('ä¿æå®¤å§ç©ºéçæ´é«æ§åãå¢ä¿±ãåç·ä¸è®ï¼åªæ¿ææå®ææãè¼¸åºç§çç´çå¯¦æççµæãè«ç´æ¥è¼¸åºç·¨è¼¯å¾çåçã')
+                prompt_parts.append('壁紙：使用提供的壁紙花紋覆蓋牆面，保持透視正確。')
+            prompt_parts.append('保持室內空間的整體構圖、傢俱、光線不變，只替換指定材料。輸出照片級真實感的結果。請直接輸出編輯後的圖片。')
 
             # Handle mask
             mask_bytes = None
@@ -113,7 +113,7 @@ def generate():
                 mask_bytes = mask_file.read()
                 # Build color-coded mask description
                 color_descs = [color_desc_map[k] for k in materials.keys() if k in color_desc_map]
-                mask_prompt = f'ç¬¬äºå¼µåæ¯å½©è²é®ç½©ï¼{"ï¼".join(color_descs)}ãé»è²ååä¸è¦æ¹åãè«åªæ¿æé®ç½©ä¸­å°æé¡è²æ¨è¨çååã'
+                mask_prompt = f'第二張圖是彩色遮罩，{"，".join(color_descs)}。黑色區域不要改動。請只替換遮罩中對應顏色標記的區域。'
                 prompt_parts.insert(0, mask_prompt)
 
             prompt = '\n'.join(prompt_parts)
@@ -133,7 +133,7 @@ def generate():
                     # Add variation hint for 2nd+ generation
                     gen_contents = list(contents)
                     if gen_idx > 0:
-                        gen_contents[0] = prompt + f'\nï¼è«çæç¬¬{gen_idx + 1}ç¨®ä¸åçè®åæ¹æ¡ï¼ææéªè¨­è§åº¦æè²èª¿å¯ä»¥ç¥æä¸åï¼'
+                        gen_contents[0] = prompt + f'\n（請生成第{gen_idx + 1}種不同的變化方案，材料鋪設角度或色調可以略有不同）'
 
                     response = client.models.generate_content(
                         model='gemini-3.1-flash-image-preview',
@@ -151,7 +151,7 @@ def generate():
                             results.append({
                                 'url': result_url,
                                 'original_url': original_url,
-                                'label': f'å ´æ¯ {i + 1} - æ¹æ¡ {gen_idx + 1}'
+                                'label': f'場景 {i + 1} - 方案 {gen_idx + 1}'
                             })
                             break
                 except Exception as gen_err:
@@ -167,10 +167,10 @@ def generate():
 
 if __name__ == '__main__':
     if not os.environ.get('GOOGLE_API_KEY'):
-        print('â ï¸  è«è¨­å®ç°å¢è®æ¸ GOOGLE_API_KEY')
+        print('⚠️  請設定環境變數 GOOGLE_API_KEY')
         print('   export GOOGLE_API_KEY=AIza...')
         print()
 
     port = int(os.environ.get('PORT', 5050))
-    print(f'ð æææ¨¡æ¬å¨ååä¸­... port={port}')
+    print(f'🚀 材料模擬器啟動中... port={port}')
     app.run(host='0.0.0.0', port=port, debug=False)
