@@ -20,30 +20,22 @@
             <p class="header-sub">上傳現況照與材料樣本，AI 為您生成模擬效果圖</p>
         </header>
 
-        <!-- Step Indicator -->
-        <div class="steps-bar">
-            <div class="step active" data-step="1">
-                <span class="step-num">1</span>
-                <span class="step-label">現況照</span>
-            </div>
-            <div class="step-line"></div>
-            <div class="step" data-step="2">
-                <span class="step-num">2</span>
-                <span class="step-label">材料照</span>
-            </div>
-            <div class="step-line"></div>
-            <div class="step" data-step="3">
-                <span class="step-num">3</span>
-                <span class="step-label">生成結果</span>
-            </div>
-        </div>
 
         <!-- Main Content -->
         <main class="main">
             <!-- Step 1: Scene Photos -->
             <section class="panel" id="panel-1">
-                <h2>上傳現況照片</h2>
+                <h2>① 上傳現況照片</h2>
                 <p class="hint">可上傳多張室內空間照片，每張可獨立設定遮罩區域</p>
+                <div class="mask-info">
+                    <h4>遮罩說明</h4>
+                    <ul>
+                        <li>每張照片可設定遮罩區域，告訴 AI 哪些部分要替換材料</li>
+                        <li>預設「AI 自動判斷」模式，AI 自動辨識地板/窗簾/壁紙區域</li>
+                        <li>切換「手動塗抹」可用不同顏色標記：<strong style="color:#e44">紅色=地板</strong>、<strong style="color:#48f">藍色=窗簾</strong>、<strong style="color:#4b6">綠色=壁紙</strong></li>
+                        <li>上傳照片後，點擊照片上的「設定遮罩」按鈕即可編輯</li>
+                    </ul>
+                </div>
 
                 <div class="upload-zone" id="scene-upload-zone">
                     <div class="upload-placeholder">
@@ -61,14 +53,11 @@
                 <!-- Scene photos grid -->
                 <div class="scene-grid" id="scene-grid"></div>
 
-                <div class="panel-actions">
-                    <button class="btn btn-primary" id="btn-to-step2" disabled>下一步：上傳材料照</button>
-                </div>
             </section>
 
             <!-- Step 2: Material Photos -->
-            <section class="panel hidden" id="panel-2">
-                <h2>上傳材料照片</h2>
+            <section class="panel" id="panel-2">
+                <h2>② 上傳材料照片</h2>
                 <p class="hint">三種材料皆為選填，上傳後可裁切截取材料部分</p>
 
                 <div class="materials-row">
@@ -141,21 +130,19 @@
                 </div>
 
                 <div class="panel-actions">
-                    <button class="btn btn-secondary" id="btn-back-step1">返回</button>
-                    <button class="btn btn-primary btn-generate" id="btn-generate">生成模擬照</button>
+                    <button class="btn btn-primary btn-generate" id="btn-generate" disabled>生成模擬照</button>
                 </div>
             </section>
 
             <!-- Step 3: Results -->
-            <section class="panel hidden" id="panel-3">
-                <h2>模擬結果</h2>
+            <section class="panel" id="panel-3">
+                <h2>③ 模擬結果</h2>
                 <div class="results-grid" id="results-grid"></div>
                 <div class="generating hidden" id="generating">
                     <div class="spinner"></div>
                     <p>AI 正在生成模擬照片，請稍候...</p>
                 </div>
                 <div class="panel-actions">
-                    <button class="btn btn-secondary" id="btn-back-step2">返回修改</button>
                     <button class="btn btn-primary" id="btn-download-all" disabled>下載全部</button>
                 </div>
             </section>
