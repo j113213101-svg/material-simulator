@@ -1,7 +1,7 @@
 /**
- * MaskTool - é®ç½©ç·¨è¼¯å·¥å·
- * æ¯æ´ç«ç­å¡æ¹ãå¤éå½¢æ¡é¸ãæ©°ç®æ¦
- * æ¯æ´å¤è²é®ç½©ï¼ç´=å°æ¿ãè=çªç°¾ãç¶ =å£ç´
+ * MaskTool - 遮罩編輯工具
+ * 支援畫筆塗抹、多邊形框選、橡皮擦
+ * 支援多色遮罩：紅=地板、藍=窗簾、綠=壁紙
  */
 class MaskTool {
     constructor() {
@@ -25,9 +25,9 @@ class MaskTool {
 
         // Material color mapping
         this.MATERIAL_COLORS = {
-            floor:     { r: 255, g: 0,   b: 0,   label: 'å°æ¿', display: 'rgba(255, 0, 0, 0.5)',   preview: 'rgba(255, 0, 0, 0.8)',   dot: '#ff4444' },
-            curtain:   { r: 0,   g: 0,   b: 255, label: 'çªç°¾', display: 'rgba(0, 0, 255, 0.5)',   preview: 'rgba(0, 0, 255, 0.8)',   dot: '#4488ff' },
-            wallpaper: { r: 0,   g: 255, b: 0,   label: 'å£ç´', display: 'rgba(0, 255, 0, 0.45)',  preview: 'rgba(0, 255, 0, 0.8)',   dot: '#44cc66' }
+            floor:     { r: 255, g: 0,   b: 0,   label: '地板', display: 'rgba(255, 0, 0, 0.5)',   preview: 'rgba(255, 0, 0, 0.8)',   dot: '#ff4444' },
+            curtain:   { r: 0,   g: 0,   b: 255, label: '窗簾', display: 'rgba(0, 0, 255, 0.5)',   preview: 'rgba(0, 0, 255, 0.8)',   dot: '#4488ff' },
+            wallpaper: { r: 0,   g: 255, b: 0,   label: '壁紙', display: 'rgba(0, 255, 0, 0.45)',  preview: 'rgba(0, 255, 0, 0.8)',   dot: '#44cc66' }
         };
         this.availableMaterials = []; // e.g. ['floor', 'curtain']
         this.activeMaterial = null; // e.g. 'floor'
