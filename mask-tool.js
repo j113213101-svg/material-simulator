@@ -1,6 +1,7 @@
 /**
- * MaskTool - 遮罩編輯工具
- * 支援畫筆塗抹、多邊形框選、橡皮擦
+ * MaskTool - é®ç½©ç·¨è¼¯å·¥å·
+ * æ¯æ´ç«ç­å¡æ¹ãå¤éå½¢æ¡é¸ãæ©°ç®æ¦
+ * æ¯æ´å¤è²é®ç½©ï¼ç´=å°æ¿ãè=çªç°¾ãç¶ =å£ç´
  */
 class MaskTool {
     constructor() {
@@ -22,7 +23,23 @@ class MaskTool {
         this.onConfirm = null;
         this.canvasOffsetX = 0;
 
+        // Material color mapping
+        this.MATERIAL_COLORS = {
+            floor:     { r: 255, g: 0,   b: 0,   label: 'å°æ¿', display: 'rgba(255, 0, 0, 0.5)',   preview: 'rgba(255, 0, 0, 0.8)',   dot: '#ff4444' },
+            curtain:   { r: 0,   g: 0,   b: 255, label: 'çªç°¾', display: 'rgba(0, 0, 255, 0.5)',   preview: 'rgba(0, 0, 255, 0.8)',   dot: '#4488ff' },
+            wallpaper: { r: 0,   g: 255, b: 0,   label: 'å£ç´', display: 'rgba(0, 255, 0, 0.45)',  preview: 'rgba(0, 255, 0, 0.8)',   dot: '#44cc66' }
+        };
+        this.availableMaterials = []; // e.g. ['floor', 'curtain']
+        this.activeMaterial = null; // e.g. 'floor'
+
         this._bindEvents();
+    }
+
+    _getActiveColor() {
+        if (!this.activeMaterial || !this.MATERIAL_COLORS[this.activeMaterial]) {
+            return { display: 'rgba(255, 0, 0, 0.5)', preview: 'rgba(255, 0, 0, 0.8)' };
+        }
+        return this.MATERIAL_COLORS[this.activeMaterial];
     }
 
     _bindEvents() {
@@ -82,11 +99,50 @@ class MaskTool {
         document.getElementById('mask-modal-close').addEventListener('click', () => this.close());
     }
 
-    open(imageDataURL, existingMask, onConfirm) {
+    /**
+     * Render color swatches in the toolbar based on available materials
+     */
+    _renderColorSwatches() {
+        const container = document.getElementById('color-swatches');
+        if (!container) return;
+        container.innerHTML = '';
+
+        this.availableMaterials.forEach((mat, idx) => {
+            const color = this.MATERIAL_COLORS[mat];
+            if (!color) return;
+            const btn = document.createElement('button');
+            btn.className = 'color-swatch' + (idx === 0 ? ' active' : '');
+            btn.dataset.material = mat;
+            btn.innerHTML = `<span class="color-dot" style="background:${color.dot}"></span>${color.label}`;
+            btn.addEventListener('click', () => {
+                container.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                btn.classList.add('active');
+                this.activeMaterial = mat;
+            });
+            container.appendChild(btn);
+        });
+
+        // Select first by default
+        if (this.availableMaterials.length > 0) {
+            this.activeMaterial = this.availableMaterials[0];
+        }
+
+        // Show/hide color selector
+        const colorGroup = document.getElementById('color-selector');
+        if (colorGroup) {
+            colorGroup.classList.toggle('hidden', this.availableMaterials.length <= 1);
+        }
+    }
+
+    open(imageDataURL, existingMask, availableMaterials, onConfirm) {
         this.onConfirm = onConfirm;
+        this.availableMaterials = availableMaterials || ['floor'];
         this.modal.classList.remove('hidden');
         this.history = [];
         this.polygonPoints = [];
+
+        // Render color swatches
+        this._renderColorSwatches();
 
         // Reset mode to AI
         document.querySelector('input[name="mask-mode"][value="ai"]').checked = true;
@@ -151,6 +207,7 @@ class MaskTool {
     _onMouseDown(e) {
         if (this.mode !== 'manual') return;
         const pos = this._getPos(e);
+        const color = this._getActiveColor();
 
         if (this.tool === 'polygon') {
             this.polygonPoints.push(pos);
@@ -172,12 +229,12 @@ class MaskTool {
         this.ctx.lineWidth = this.brushSize;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
-        this.ctx.strokeStyle = 'rgba(255, 80, 80, 0.5)';
+        this.ctx.strokeStyle = color.display;
 
         // Draw a dot for single click
         this.ctx.beginPath();
         this.ctx.arc(pos.x, pos.y, this.brushSize / 2, 0, Math.PI * 2);
-        this.ctx.fillStyle = 'rgba(255, 80, 80, 0.5)';
+        this.ctx.fillStyle = color.display;
         if (this.tool === 'eraser') {
             this.ctx.globalCompositeOperation = 'destination-out';
             this.ctx.fillStyle = 'rgba(0,0,0,1)';
@@ -219,7 +276,7 @@ class MaskTool {
 
     _drawPolygonPreview() {
         if (this.polygonPoints.length < 2) return;
-        // Redraw from last history state + current points preview
+        const color = this._getActiveColor();
         const lastState = this.history[this.history.length - 1];
         if (lastState) {
             this.ctx.putImageData(lastState, 0, 0);
@@ -229,7 +286,7 @@ class MaskTool {
         for (let i = 1; i < this.polygonPoints.length; i++) {
             this.ctx.lineTo(this.polygonPoints[i].x, this.polygonPoints[i].y);
         }
-        this.ctx.strokeStyle = 'rgba(255, 80, 80, 0.8)';
+        this.ctx.strokeStyle = color.preview;
         this.ctx.lineWidth = 2;
         this.ctx.stroke();
 
@@ -237,17 +294,17 @@ class MaskTool {
         this.polygonPoints.forEach(p => {
             this.ctx.beginPath();
             this.ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-            this.ctx.fillStyle = 'rgba(255, 80, 80, 0.9)';
+            this.ctx.fillStyle = color.preview;
             this.ctx.fill();
         });
     }
 
     _closePolygon() {
         if (this.polygonPoints.length < 3) return;
+        const color = this._getActiveColor();
 
         this._saveHistory();
 
-        // Restore clean state before drawing filled polygon
         const lastState = this.history[this.history.length - 1];
         if (lastState) {
             this.ctx.putImageData(lastState, 0, 0);
@@ -259,7 +316,7 @@ class MaskTool {
             this.ctx.lineTo(this.polygonPoints[i].x, this.polygonPoints[i].y);
         }
         this.ctx.closePath();
-        this.ctx.fillStyle = 'rgba(255, 80, 80, 0.5)';
+        this.ctx.fillStyle = color.display;
         this.ctx.fill();
 
         this.polygonPoints = [];
@@ -290,20 +347,44 @@ class MaskTool {
         this.cursor.style.height = this.brushSize + 'px';
     }
 
+    /**
+     * Snap a pixel's RGB to the nearest known material color or black.
+     */
+    _snapColor(r, g, b, a) {
+        if (a < 20) return { r: 0, g: 0, b: 0 }; // transparent -> black (no mask)
+
+        // Find dominant channel
+        let bestMat = null;
+        let bestScore = -1;
+
+        for (const [mat, color] of Object.entries(this.MATERIAL_COLORS)) {
+            // Score = how closely this pixel matches the material color
+            const score = (color.r > 0 ? r : 0) + (color.g > 0 ? g : 0) + (color.b > 0 ? b : 0);
+            const penalty = (color.r === 0 ? r : 0) + (color.g === 0 ? g : 0) + (color.b === 0 ? b : 0);
+            const net = score - penalty;
+            if (net > bestScore) {
+                bestScore = net;
+                bestMat = mat;
+            }
+        }
+
+        if (bestMat && bestScore > 30) {
+            const c = this.MATERIAL_COLORS[bestMat];
+            return { r: c.r, g: c.g, b: c.b };
+        }
+        return { r: 0, g: 0, b: 0 };
+    }
+
     _confirm() {
         let maskData = null;
         let maskMode = this.mode;
 
         if (this.mode === 'manual') {
-            // Generate black/white mask: white = area to replace
+            // Generate color-coded mask at original resolution
             const maskCanvas = document.createElement('canvas');
             maskCanvas.width = this.currentImage.width;
             maskCanvas.height = this.currentImage.height;
             const mCtx = maskCanvas.getContext('2d');
-
-            // Scale up the mask to original image size
-            mCtx.fillStyle = '#000';
-            mCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
 
             // Get mask pixels from display canvas
             const displayData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
@@ -312,33 +393,35 @@ class MaskTool {
             tempCanvas.height = this.canvas.height;
             const tCtx = tempCanvas.getContext('2d');
 
-            // Convert colored mask to white mask
+            // Convert to clean color-coded mask (snap colors)
             const outData = tCtx.createImageData(this.canvas.width, this.canvas.height);
             for (let i = 0; i < displayData.data.length; i += 4) {
+                const r = displayData.data[i];
+                const g = displayData.data[i + 1];
+                const b = displayData.data[i + 2];
                 const a = displayData.data[i + 3];
-                if (a > 10) {
-                    outData.data[i] = 255;
-                    outData.data[i + 1] = 255;
-                    outData.data[i + 2] = 255;
-                    outData.data[i + 3] = 255;
-                } else {
-                    outData.data[i] = 0;
-                    outData.data[i + 1] = 0;
-                    outData.data[i + 2] = 0;
-                    outData.data[i + 3] = 255;
-                }
+
+                const snapped = this._snapColor(r, g, b, a);
+                outData.data[i] = snapped.r;
+                outData.data[i + 1] = snapped.g;
+                outData.data[i + 2] = snapped.b;
+                outData.data[i + 3] = 255;
             }
             tCtx.putImageData(outData, 0, 0);
 
-            // Draw scaled to original resolution
+            // Scale to original resolution
+            mCtx.fillStyle = '#000';
+            mCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+            mCtx.imageSmoothingEnabled = false;
             mCtx.drawImage(tempCanvas, 0, 0, maskCanvas.width, maskCanvas.height);
+
             maskData = maskCanvas.toDataURL('image/png');
         }
 
         if (this.onConfirm) {
             this.onConfirm({
                 mode: maskMode,
-                maskDataURL: maskData, // null if AI mode
+                maskDataURL: maskData,
                 previewDataURL: this.mode === 'manual' ? this.canvas.toDataURL('image/png') : null
             });
         }
