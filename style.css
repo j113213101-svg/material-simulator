@@ -343,6 +343,48 @@ body {
 .btn-remove { background: #fef2f2; color: var(--danger); }
 .btn-remove:hover { background: var(--danger); color: #fff; }
 
+/* ===== Curtain Type Selector ===== */
+.curtain-type-selector {
+    margin-bottom: 12px;
+}
+.curtain-type-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-500);
+    margin-bottom: 6px;
+}
+.curtain-type-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.curtain-type-opt {
+    cursor: pointer;
+    display: flex;
+}
+.curtain-type-opt input { display: none; }
+.curtain-type-tag {
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gray-500);
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    transition: var(--transition);
+}
+.curtain-type-tag:hover {
+    border-color: var(--accent);
+    color: var(--gray-700);
+}
+.curtain-type-opt input:checked + .curtain-type-tag {
+    background: var(--accent);
+    color: var(--primary);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
 /* ===== Modal ===== */
 .modal {
     position: fixed;
