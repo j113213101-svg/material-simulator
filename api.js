@@ -1,11 +1,11 @@
 /**
- * API module - èå¾ç«¯ Flask proxy éä¿¡ï¼å¼å« Google Gemini API
+ * API module - 與後端 Flask proxy 通信，呼叫 Google Gemini API
  */
 const API = {
     BASE_URL: '',
 
     /**
-     * çææ¨¡æ¬ç§
+     * 生成模擬照
      * @param {Object} params
      * @param {Array<{imageDataURL: string, maskDataURL: string|null, maskMode: string}>} params.scenes
      * @param {{floor: string|null, curtain: string|null, wallpaper: string|null}} params.materials
